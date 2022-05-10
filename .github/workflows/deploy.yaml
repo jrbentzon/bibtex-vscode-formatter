@@ -23,5 +23,4 @@ jobs:
           npm install
           npm i -g vsce
 
-          vsce login jrbentzon 
           vsce publish ${version:1}
