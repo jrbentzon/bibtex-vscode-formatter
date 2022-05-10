@@ -19,7 +19,7 @@ jobs:
         env:
           MAJOR_V: "0"
           MINOR_V: "2"
-          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         run: |
           set -e
           providedMajor=$MAJOR_V
