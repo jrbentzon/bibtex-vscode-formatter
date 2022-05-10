@@ -5,7 +5,7 @@
   "publisher": "jrbentzon",
   "version": "0.0.0",
   "repository": {
-    "directory": "/home/jrb/jrbentzon/bibtex-formatter"
+    "url": "https://github.com/jrbentzon/bibtex-vscode-formatter"
   },
   "engines": {
     "vscode": "^1.66.0"
