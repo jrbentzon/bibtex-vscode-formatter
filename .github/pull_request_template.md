@@ -1,0 +1,16 @@
+Fixes/Implements #<issue number>.
+
+## Scope
+
+Implemented:
+ - Awesome new feature
+ - And another awesome new feature
+
+Additional changes:
+- Refactored `AwesomeClass`
+- Removed deprecated `AnotherClass` and `get_awesomeness` from `AwesomeClass`
+
+## Checklist
+
+- [ ] GitHub issue exists for this change.
+- [ ] Review requested on `latest` commit.
