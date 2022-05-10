@@ -21,7 +21,7 @@ jobs:
           
           version=$(git describe --tags --abbrev=7)
           npm install
-          npm install vsce --save-dev
+          npm i -g vsce
 
           vsce login jrbentzon 
           vsce publish ${version:1}
