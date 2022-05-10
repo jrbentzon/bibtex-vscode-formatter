@@ -15,6 +15,7 @@ jobs:
       - name: Publish Package
         env:
           VSCE_PAT: ${{ secrets.VSCE_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         if: startsWith(github.ref, 'refs/tags')
         run: |
           set -e
