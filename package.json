@@ -3,9 +3,9 @@
   "displayName": "BibTeX formatter",
   "description": "BibTeX Formatter",
   "publisher": "jrbentzon",
-  "version": "0.2.0",
+  "version": "0.0.0",
   "repository": {
-    "directory": "/home/jrb/jrbentzon/bibtex-formatter"
+    "url": "https://github.com/jrbentzon/bibtex-vscode-formatter"
   },
   "engines": {
     "vscode": "^1.66.0"

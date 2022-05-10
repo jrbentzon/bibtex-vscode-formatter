@@ -56,9 +56,9 @@ export class BibTeXFormatter {
 		let authors = this.getAuthors(document, linenum);
 		let newAuthorString = "";
 		if (authors.length < 3) {
-			newAuthorString = authors.join(" AND ");
+			newAuthorString = "{" + authors.join(" AND ") + "}";
 		} else {
-			newAuthorString = authors.join("\n" + " ".repeat(this.eqTargetIndex + 1) + "AND ");
+			newAuthorString = "{" + authors.join("\n" + " ".repeat(this.eqTargetIndex + 1) + "AND ") + "}";
 		}
 		let startPosInd = line.text.indexOf("=") + 2;
 		let startPos = line.range.start.with({ character: startPosInd });
@@ -193,7 +193,7 @@ export class BibTeXFormatter {
 		text = document
 			.getText(new vscode.Range(startPos, endPos))
 			.replace("\n", "").trim();
-		return text.substring(1, text.length - 2);
+		return text.substring(1, text.length - 1);
 	}
 
 	private getBlock(document: vscode.TextDocument, startPos: vscode.Position): string {
@@ -201,7 +201,7 @@ export class BibTeXFormatter {
 		let text = document
 			.getText(new vscode.Range(startPos, endPos))
 			.replace("\n", "").trim();
-		return text.substring(1, text.length - 2);
+		return text.substring(1, text.length - 1);
 	}
 
 	private getBlockEndPos(document: vscode.TextDocument, startPos: vscode.Position): vscode.Position {

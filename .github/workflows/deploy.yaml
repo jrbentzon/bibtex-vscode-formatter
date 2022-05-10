@@ -1,0 +1,27 @@
+name: Release to VSCode Marketplace
+
+on: workflow_dispatch
+jobs:
+  publish:
+    name: Release to VS Code Marketplace
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - run: git fetch --prune --unshallow
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Publish Package
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_TOKEN }}
+        if: startsWith(github.ref, 'refs/tags')
+        run: |
+          set -e
+          
+          version=$(git describe --tags --abbrev=7)
+          npm install
+          npm install vsce --save-dev
+
+          vsce login jrbentzon 
+          vsce publish ${version:1}
