@@ -2,6 +2,10 @@ import * as vscode from 'vscode';
 import { capitalizeFirstLetter } from "./capitalizeFirstLetter";
 import { deleteLine } from "./deleteLine";
 
+export function stringLeftSpaces(str: string): number {
+	return str.length - str.trimLeft().length;
+}
+
 export class BibTeXFormatter {
 
 	symbolTargetIndex = 3;
@@ -31,10 +35,10 @@ export class BibTeXFormatter {
 
 		const eqMarkIndex = line.text.indexOf("=");
 		if (eqMarkIndex === -1) { return edits; }
-		if (eqMarkIndex >= this.eqTargetIndex) { return edits; }
 		edits.push(this.appendSpacesBeforeSymbol(line));
 		edits.push(this.appendSpacesAfterSymbol(line));
 		edits.push(this.capitalizeSymbol(line, eqMarkIndex));
+		edits.push(this.appendSpacesAfterEquationMark(line));
 
 		return edits;
 	};
@@ -60,7 +64,9 @@ export class BibTeXFormatter {
 		} else {
 			newAuthorString = "{" + authors.join("\n" + " ".repeat(this.eqTargetIndex + 1) + "AND ") + "}";
 		}
-		let startPosInd = line.text.indexOf("=") + 2;
+		let eqMarkIndex = line.text.indexOf("=");
+		let spacesAfterEqMark = stringLeftSpaces(line.text.substring(eqMarkIndex + 1));
+		let startPosInd = eqMarkIndex + spacesAfterEqMark + 1;
 		let startPos = line.range.start.with({ character: startPosInd });
 		let endPos = this.getBlockEndPos(document, startPos);
 		return vscode.TextEdit.replace(new vscode.Range(startPos, endPos), newAuthorString);
@@ -92,11 +98,28 @@ export class BibTeXFormatter {
 	}
 
 	private appendSpacesBeforeSymbol(line: vscode.TextLine): vscode.TextEdit {
-		const nSpaces = this.symbolTargetIndex - line.firstNonWhitespaceCharacterIndex;
-		const insert = " ".repeat(nSpaces);
-		return vscode.TextEdit.insert(line.range.start, insert);
+		const currentSpaces = stringLeftSpaces(line.text);
+		const nSpaces = this.symbolTargetIndex - currentSpaces;
+		if (nSpaces > 0) {
+			const insert = " ".repeat(nSpaces);
+			return vscode.TextEdit.insert(line.range.start, insert);
+		} else {
+			return vscode.TextEdit.delete(new vscode.Range(line.range.start, line.range.start.translate({ characterDelta: -nSpaces })));
+		}
 	}
 
+	private appendSpacesAfterEquationMark(line: vscode.TextLine): vscode.TextEdit {
+		const startInd = line.text.indexOf('=') + 1;
+		const startPos = line.range.start.with({ character: startInd });
+		const currentSpaces = stringLeftSpaces(line.text.substring(startInd));
+		const nSpaces = 1 - currentSpaces;
+		if (nSpaces > 0) {
+			const insert = " ".repeat(nSpaces);
+			return vscode.TextEdit.insert(startPos, insert);
+		} else {
+			return vscode.TextEdit.delete(new vscode.Range(startPos, startPos.translate({ characterDelta: -nSpaces })));
+		}
+	}
 
 	private capitalizeSymbol(line: vscode.TextLine, eqMarkIndex: number): vscode.TextEdit {
 		const symbol = line.text.substring(0, eqMarkIndex);
@@ -107,8 +130,14 @@ export class BibTeXFormatter {
 	private appendSpacesAfterSymbol(line: vscode.TextLine): vscode.TextEdit {
 		const eqMarkIndex = line.text.indexOf("=");
 		const nSpaces = this.eqTargetIndex - eqMarkIndex - (this.symbolTargetIndex - line.firstNonWhitespaceCharacterIndex);
-		const insert = " ".repeat(nSpaces);
-		return vscode.TextEdit.insert(new vscode.Position(line.lineNumber, eqMarkIndex - 1), insert);
+
+		if (nSpaces > 0) {
+			const insert = " ".repeat(nSpaces);
+			return vscode.TextEdit.insert(new vscode.Position(line.lineNumber, eqMarkIndex), insert);
+		} else {
+			return vscode.TextEdit.delete(new vscode.Range(line.lineNumber, eqMarkIndex + nSpaces, line.lineNumber, eqMarkIndex));
+		}
+
 	}
 
 	private getFirstAuthorLastName(document: vscode.TextDocument, linenum: number): string {
@@ -125,7 +154,7 @@ export class BibTeXFormatter {
 			.map(n => n
 				.split(" ")
 				.map(sn => capitalizeFirstLetter(sn.trimLeft()))
-				.join(" "))
+				.join(" ").trim())
 			.join(", ");
 	}
 
@@ -134,7 +163,7 @@ export class BibTeXFormatter {
 		return authors
 			.toLowerCase()
 			.split("and")
-			.map(a => this.capitalizeAuthors(a));
+			.map(a => this.capitalizeAuthors(a.trim()));
 	}
 
 	private getNextBlock(document: vscode.TextDocument, startPos: vscode.Position): string {
@@ -205,10 +234,10 @@ export class BibTeXFormatter {
 	}
 
 	private getBlockEndPos(document: vscode.TextDocument, startPos: vscode.Position): vscode.Position {
-		let searchRange = new vscode.Range(startPos, document.lineAt(document.lineCount - 1).range.end);
+		let startOffset = document.offsetAt(startPos);
 
-		let text = document.getText(searchRange);
-		let i = 1;
+		let text = document.getText();
+		let i = startOffset + 1;
 		let depth = 1;
 		while (i < text.length && depth > 0) {
 			let char = text[i];
@@ -219,7 +248,7 @@ export class BibTeXFormatter {
 			}
 			i++;
 		}
-		let endPos = startPos.with({ character: startPos.character + i });
+		let endPos = document.positionAt(i);
 		return endPos;
 	}
 }

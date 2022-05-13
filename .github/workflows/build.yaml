@@ -7,6 +7,21 @@ on:
     branches: [ main ]
 
 jobs:
+  validate_code:
+    name: Validate Code
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - uses: actions/checkout@v2
+      - run: git fetch --prune --unshallow
+      - name: Validate Code
+        run: |
+          npm install
+          npm i -g vsce
+
+          vsce package
+
   create_release:
     name: Create Release
     runs-on: ubuntu-latest
