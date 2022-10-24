@@ -162,7 +162,7 @@ export class BibTeXFormatter {
 		let authors = this.getValueOfNextSymbol(document, document.lineAt(linenum).range.start, "author");
 		return authors
 			.toLowerCase()
-			.split("and")
+			.split("\Wand\W")
 			.map(a => this.capitalizeAuthors(a.trim()));
 	}
 
